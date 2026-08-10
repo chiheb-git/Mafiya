@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/mafia-mobile/"
+title = "MAFIA Mobile"
+description = "Application mobile multijoueur en temps réel basée sur le jeu social Mafia. Les joueurs créent ou rejoignent des salons, puis jouent des parties synchronisées par le serveur en mode 7 ou 14 joueurs."
+version = "1.0.0"
+id = "artifacts/mafia-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/mafia-mobile/" ]
+localPort = 21853
+
+[services.development]
+run = "pnpm --filter @workspace/mafia-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mafia-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/mafia-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "21853"
+BASE_PATH = "/mafia-mobile/"

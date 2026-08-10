@@ -1,0 +1,44 @@
+Continue le développement de MAFIA en suivant intégralement le cahier des charges déjà fourni, sans en oublier aucun point. Voici la liste complète de ce qu'il reste à implémenter, dans l'ordre :
+
+1. Création / jointure de groupe — génération automatique d'un code à 10 chiffres, choix du mode (7 joueurs : 5 Citoyens/2 Mafia, ou 14 joueurs : 11 Citoyens/3 Mafia), vérification serveur du nombre de places, message "GROUPE COMPLET" si atteint.
+
+2. Lobby — liste des joueurs avec avatar/pseudo/statut, identification visuelle du chef de groupe, système "Prêt" obligatoire pour tous avant de pouvoir démarrer.
+
+3. Chat textuel — messages horodatés dans le lobby.
+
+4. Chat vocal — activation/désactivation individuelle du micro.
+
+5. Synchronisation temps réel complète — Socket.IO comme source de vérité unique, machine à états serveur (LOBBY → ROLE_REVEAL → NIGHT → DISCUSSION → VOTING → VOTE_RESULT → CHECK_WINNER), timers pilotés exclusivement par le serveur (jamais de setTimeout local seul).
+
+6. Distribution des rôles — aléatoire et secrète côté serveur uniquement, chaque joueur ne reçoit que ses propres informations, les Mafia voient leurs coéquipiers.
+
+7. Boucle de jeu complète — discussion (60s/joueur avec bouton "je passe"), vote (avec gestion de l'égalité et second tour), élimination avec révélation du rôle, passage automatique en spectateur.
+
+8. Phase de nuit — Alpha (choix de la victime, bouton "passer" réservé à lui), Mut (mute 30s max, bouton "passer").
+
+9. Rôles spéciaux Citoyens — Mire (révélation publique, vote x3), Le Fils (élimine un joueur avec lui s'il meurt), Secouriste (protège la cible de l'Alpha), Tireur (une seule balle, tire et se révèle le résultat).
+
+10. Conditions de victoire — Citoyens (toutes les Mafia éliminées), Mafia (nombre Mafia ≥ nombre Citoyens vivants).
+
+11. Spectateur — accès en lecture seule après élimination.
+
+12. Reconnexion — récupération automatique du rôle, de la phase, du timer et du statut après perte de connexion, sans jamais redémarrer la partie.
+
+13. Sécurité serveur — validation stricte des permissions par phase/rôle, rate limiting, sanitation du chat, aucune donnée secrète envoyée au frontend au-delà de ce qu'un joueur a le droit de voir.
+
+14. Animations, sons et haptic feedback — selon la direction artistique dark cinematic déjà en place (fumée, particules, lueurs rouges, transitions lentes).
+
+15. Notifications — invitation, joueur rejoint, partie commencée.
+
+16. Gestion des erreurs — tous les messages listés dans le cahier des charges (code invalide, groupe complet, partie déjà commencée, etc.).
+
+17. Tests — tous les scénarios listés dans le cahier des charges, y compris avec plusieurs clients simultanés.
+
+18. Build Android de production — configuration EAS, permissions minimales, préparation Play Store.
+
+Règles impératives à respecter tout au long :
+
+Ne saute aucune étape et ne les fusionne pas superficiellement — chaque fonctionnalité doit être connectée à une vraie logique backend, pas juste une interface qui simule le comportement.
+Après chaque étape terminée, arrête-toi et fournis une preuve vérifiable (capture d'écran ou description testable) avant de continuer à la suivante.
+Le serveur reste toujours la seule source de vérité — jamais de règle de jeu décidée côté client.
+Si tu approches une limite de quota ou de temps, arrête-toi proprement à la fin d'une étape complète plutôt que de laisser une fonctionnalité à moitié faite.

@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: rooms
+    description: Mafia room operations
 paths:
   /healthz:
     get:
@@ -24,7 +26,90 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /rooms:
+    post:
+      operationId: createRoom
+      tags: [rooms]
+      summary: Create a Mafia room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomInput"
+      responses:
+        "201":
+          description: Room created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "400":
+          description: Invalid room data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /rooms/{code}:
+    get:
+      operationId: getRoom
+      tags: [rooms]
+      summary: Get a room by its code
+      parameters:
+        - $ref: "#/components/parameters/RoomCode"
+      responses:
+        "200":
+          description: Room details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          description: Room not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: joinRoom
+      tags: [rooms]
+      summary: Join an existing Mafia room
+      parameters:
+        - $ref: "#/components/parameters/RoomCode"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomPlayerInput"
+      responses:
+        "200":
+          description: Room after joining
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "400":
+          description: Invalid player data or room is full
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Room not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    RoomCode:
+      name: code
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[0-9]{10}$"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +118,69 @@ components:
           type: string
       required:
         - status
+    RoomInput:
+      type: object
+      properties:
+        mode:
+          type: integer
+          enum: [7, 14]
+        host:
+          $ref: "#/components/schemas/RoomPlayerInput"
+      required: [mode, host]
+    RoomPlayerInput:
+      type: object
+      properties:
+        playerId:
+          type: string
+          minLength: 1
+          maxLength: 80
+        nickname:
+          type: string
+          minLength: 2
+          maxLength: 24
+        avatar:
+          type: string
+          maxLength: 120
+      required: [playerId, nickname]
+    RoomPlayer:
+      type: object
+      properties:
+        playerId:
+          type: string
+        nickname:
+          type: string
+        avatar:
+          type: ["string", "null"]
+        isHost:
+          type: boolean
+        isReady:
+          type: boolean
+      required: [playerId, nickname, avatar, isHost, isReady]
+    Room:
+      type: object
+      properties:
+        code:
+          type: string
+        mode:
+          type: integer
+          enum: [7, 14]
+        capacity:
+          type: number
+        status:
+          type: string
+          enum: [LOBBY, STARTED]
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomPlayer"
+        createdAt:
+          type: string
+          format: date-time
+      required: [code, mode, capacity, status, players, createdAt]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
 
