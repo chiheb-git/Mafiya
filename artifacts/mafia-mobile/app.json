@@ -14,21 +14,38 @@
       "backgroundColor": "#111417"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.mafiagame.mobile",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "MAFIA a besoin du micro pour la communication vocale pendant les parties."
+      }
     },
-    "android": {},
+    "android": {
+      "package": "com.mafiagame.mobile",
+      "versionCode": 1,
+      "permissions": [
+        "RECORD_AUDIO",
+        "INTERNET"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#111417"
+      }
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
     "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
       [
-        "expo-router",
+        "expo-audio",
         {
-          "origin": "https://replit.com/"
+          "microphonePermission": "MAFIA a besoin du micro pour la communication vocale pendant les parties."
         }
       ],
-      "expo-font",
-      "expo-web-browser"
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,

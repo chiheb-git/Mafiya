@@ -1,3 +1,10 @@
-const { getDefaultConfig } = require('expo/metro-config');
+﻿const { getDefaultConfig } = require('expo/metro-config');
 
-module.exports = getDefaultConfig(__dirname);
+const config = getDefaultConfig(__dirname);
+
+const videoExtensions = ['mp4', 'mov', 'webm', 'm4v'];
+config.resolver.assetExts = Array.from(
+  new Set([...config.resolver.assetExts, ...videoExtensions])
+);
+
+module.exports = config;

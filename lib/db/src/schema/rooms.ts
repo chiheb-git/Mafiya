@@ -1,4 +1,4 @@
-import {
+﻿import {
   boolean,
   integer,
   pgTable,
@@ -25,6 +25,7 @@ export const roomPlayersTable = pgTable("mafia_room_players", {
   avatar: varchar("avatar", { length: 120 }),
   isHost: boolean("is_host").notNull().default(false),
   isReady: boolean("is_ready").notNull().default(false),
+  sessionToken: varchar("session_token", { length: 64 }),
   joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

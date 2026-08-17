@@ -140,6 +140,7 @@ components:
           maxLength: 24
         avatar:
           type: string
+          nullable: true
           maxLength: 120
       required: [playerId, nickname]
     RoomPlayer:

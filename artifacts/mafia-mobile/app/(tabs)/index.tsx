@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from '@/hooks/useColors';
+import { GlowOrb, GlassPanel, PressableScale } from '@/components/cinematic';
 
 const PROFILE_KEY = '@mafia/profile';
 type Profile = { nickname: string; playerId: string };
@@ -30,7 +32,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <View style={[styles.orb, { backgroundColor: colors.primary }]} />
+      <GlowOrb size={420} color={colors.glow} style={styles.orb} baseOpacity={0.13} />
       <Animated.ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 28 }]}
         style={{ opacity: appear, transform: [{ translateY: appear.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) }] }}
@@ -41,17 +43,28 @@ export default function HomeScreen() {
             <Text style={[styles.eyebrow, { color: colors.accent }]}>PRIVATE ROOM / 01</Text>
             <Text style={[styles.wordmark, { color: colors.foreground }]}>MAFIA</Text>
           </View>
-          <Pressable
-            accessibilityLabel="Reset nickname"
-            testID="reset-profile"
-            onPress={() => {
-              Haptics.selectionAsync();
-              AsyncStorage.removeItem(PROFILE_KEY).then(() => router.replace('/'));
-            }}
-            style={({ pressed }) => [styles.profileMark, { backgroundColor: colors.secondary, opacity: pressed ? 0.7 : 1 }]}
-          >
-            <Text style={[styles.profileInitial, { color: colors.accent }]}>{profile?.nickname?.slice(0, 1).toUpperCase() ?? '·'}</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <PressableScale
+              accessibilityLabel="Settings"
+              testID="open-settings"
+              onPress={() => { Haptics.selectionAsync(); router.push('/settings'); }}
+              scaleTo={0.9}
+            >
+              <GlassPanel radius={20} style={styles.profileMark} noSheen>
+                <Feather name="settings" size={17} color={colors.accent} />
+              </GlassPanel>
+            </PressableScale>
+            <PressableScale
+              accessibilityLabel="Profile"
+              testID="open-profile"
+              onPress={() => { Haptics.selectionAsync(); router.push('/profile'); }}
+              scaleTo={0.9}
+            >
+              <GlassPanel radius={20} style={styles.profileMark} noSheen>
+                <Text style={[styles.profileInitial, { color: colors.accent }]}>{profile?.nickname?.slice(0, 1).toUpperCase() ?? '?'}</Text>
+              </GlassPanel>
+            </PressableScale>
+          </View>
         </View>
 
         <View style={styles.hero}>
@@ -93,35 +106,53 @@ export default function HomeScreen() {
 
 type Theme = ReturnType<typeof useColors>;
 function ActionButton({ icon, title, caption, colors, onPress, primary, testID }: { icon: React.ComponentProps<typeof Feather>['name']; title: string; caption: string; colors: Theme; onPress: () => void; primary?: boolean; testID: string }) {
-  return (
-    <Pressable testID={testID} onPress={onPress} style={({ pressed }) => [styles.action, { backgroundColor: primary ? colors.primary : colors.card, borderColor: primary ? colors.primary : colors.border, transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
-      <View style={[styles.actionIcon, { backgroundColor: primary ? 'rgba(23,17,15,0.16)' : colors.secondary }]}>
+  const body = (
+    <>
+      <View style={[styles.actionIcon, { backgroundColor: primary ? 'rgba(242,237,226,0.14)' : colors.secondary }]}>
         <Feather name={icon} size={21} color={primary ? colors.primaryForeground : colors.accent} />
       </View>
       <View style={styles.actionCopy}>
         <Text style={[styles.actionTitle, { color: primary ? colors.primaryForeground : colors.foreground }]}>{title}</Text>
-        <Text style={[styles.actionCaption, { color: primary ? 'rgba(23,17,15,0.64)' : colors.mutedForeground }]}>{caption}</Text>
+        <Text style={[styles.actionCaption, { color: primary ? 'rgba(242,237,226,0.72)' : colors.mutedForeground }]}>{caption}</Text>
       </View>
       <Feather name="arrow-up-right" size={19} color={primary ? colors.primaryForeground : colors.mutedForeground} />
-    </Pressable>
+    </>
+  );
+
+  if (primary) {
+    return (
+      <PressableScale testID={testID} onPress={onPress} scaleTo={0.985}>
+        <LinearGradient colors={[colors.primary, colors.accentSoft]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.action}>
+          {body}
+        </LinearGradient>
+      </PressableScale>
+    );
+  }
+
+  return (
+    <PressableScale testID={testID} onPress={onPress} scaleTo={0.985}>
+      <GlassPanel radius={18} style={styles.action} noSheen>
+        {body}
+      </GlassPanel>
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, overflow: 'hidden' },
-  orb: { position: 'absolute', width: 280, height: 280, borderRadius: 140, top: -170, right: -120, opacity: 0.08 },
+  orb: { position: 'absolute', top: -230, right: -160 },
   content: { paddingHorizontal: 24, paddingTop: 24, flexGrow: 1 },
   topline: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   eyebrow: { fontFamily: 'Inter_600SemiBold', fontSize: 10, letterSpacing: 2.1 },
   wordmark: { fontFamily: 'Inter_700Bold', fontSize: 26, letterSpacing: 5, marginTop: 6 },
-  profileMark: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
+  profileMark: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   profileInitial: { fontFamily: 'Inter_700Bold', fontSize: 16 },
   hero: { marginTop: 88, marginBottom: 48 },
   kicker: { fontFamily: 'Inter_600SemiBold', fontSize: 11, letterSpacing: 2.2, marginBottom: 14 },
   title: { fontFamily: 'Inter_700Bold', fontSize: 52, letterSpacing: -2.8, lineHeight: 53 },
   body: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 23, maxWidth: 310, marginTop: 20 },
   actions: { gap: 12 },
-  action: { minHeight: 82, borderWidth: 1, borderRadius: 18, padding: 15, flexDirection: 'row', alignItems: 'center' },
+  action: { minHeight: 82, borderRadius: 18, padding: 15, flexDirection: 'row', alignItems: 'center' },
   actionIcon: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   actionCopy: { flex: 1, marginLeft: 14 },
   actionTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
