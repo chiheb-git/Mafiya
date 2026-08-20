@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { GlassPanel, PressableScale } from '@/components/cinematic';
+import { GlassPanel, PressableScale, VideoBackground } from '@/components/cinematic';
 
 export default function SettingsScreen() {
   const colors = useColors();
@@ -21,6 +21,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <VideoBackground source={require('@/assets/videos/bg-wolf.mp4')} scrimOpacity={0.42} />
       <View style={styles.header}>
         <PressableScale testID="back-button" onPress={() => router.back()} scaleTo={0.88} style={styles.back}>
           <Feather name="arrow-left" size={20} color={colors.foreground} />
