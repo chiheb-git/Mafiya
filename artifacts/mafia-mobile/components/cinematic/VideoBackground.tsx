@@ -8,19 +8,34 @@ type VideoBackgroundProps = {
   source: any;
   /** 0..1 darkness of the scrim on top of the video, for text legibility */
   scrimOpacity?: number;
+  /** true (default): loops forever. false: plays once and freezes on the last frame. */
+  loop?: boolean;
   children?: React.ReactNode;
 };
 
 /**
- * Full-bleed looping, muted video used as an atmospheric background layer
- * (e.g. the wolf prowling behind the Home screen) instead of a one-shot
- * intro. Web renders a native <video> tag (autoPlay/loop/muted are the
- * only reliable way to autoplay on web); native renders expo-video's
- * VideoView. A dark gradient scrim sits on top so foreground text stays
- * readable regardless of what's happening in the footage.
+ * Full-bleed video used as an atmospheric background layer.
+ *
+ * Web uses a plain HTML5 <video> (the same proven pattern as the intro
+ * screen) because it fills the container reliably with objectFit: cover —
+ * expo-video's VideoView does not size correctly on web in this project.
+ * Native uses expo-video's VideoView. Looping is handled manually via
+ * onEnded on web (the native `loop` attribute silently suppresses the
+ * `ended` event, so a manual restart is the only reliable cross-browser
+ * approach) and via `instance.loop` on native.
  */
-export function VideoBackground({ source, scrimOpacity = 0.72, children }: VideoBackgroundProps) {
+export function VideoBackground({ source, scrimOpacity = 0.4, loop = true, children }: VideoBackgroundProps) {
   if (Platform.OS === 'web') {
+    const loopHandlers = loop
+      ? {
+          onEnded: (e: any) => {
+            const el = e.currentTarget;
+            el.currentTime = 0;
+            el.play().catch(() => {});
+          },
+        }
+      : {};
+
     return (
       <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -29,8 +44,9 @@ export function VideoBackground({ source, scrimOpacity = 0.72, children }: Video
             src={source}
             autoPlay
             muted
-            loop
             playsInline
+            {...loopHandlers}
+            onError={(e: any) => console.warn('[VideoBackground] failed to load', source, e)}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
           <LinearGradient
@@ -45,7 +61,7 @@ export function VideoBackground({ source, scrimOpacity = 0.72, children }: Video
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      <NativeVideoLayer source={source} />
+      <NativeVideoLayer source={source} loop={loop} />
       <LinearGradient
         pointerEvents="none"
         colors={[`rgba(10,10,10,${scrimOpacity})`, `rgba(10,10,10,${Math.min(1, scrimOpacity + 0.18)})`]}
@@ -56,9 +72,9 @@ export function VideoBackground({ source, scrimOpacity = 0.72, children }: Video
   );
 }
 
-function NativeVideoLayer({ source }: { source: any }) {
+function NativeVideoLayer({ source, loop }: { source: any; loop: boolean }) {
   const player = useVideoPlayer(source, (instance) => {
-    instance.loop = true;
+    instance.loop = loop;
     instance.muted = true;
     instance.play();
   });

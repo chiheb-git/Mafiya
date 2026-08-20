@@ -20,7 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from '@/hooks/useColors';
 import { useLobbySocket } from '@/hooks/useLobbySocket';
 import { useAudioRecorderState, useAudioRecorder, RecordingPresets, requestRecordingPermissionsAsync, getRecordingPermissionsAsync, useAudioPlayer } from 'expo-audio';
-import { GlassPanel, GlowOrb, PressableScale } from '@/components/cinematic';
+import { GlassPanel, GlowOrb, PressableScale, VideoBackground } from '@/components/cinematic';
 
 export default function RoomCode() {
   const colors = useColors();
@@ -316,6 +316,7 @@ export default function RoomCode() {
         behavior={Platform.select({ ios: 'padding', android: undefined })}
         keyboardVerticalOffset={120}
       >
+        <VideoBackground source={require('@/assets/videos/lobby-trailer.mp4')} scrimOpacity={0.42} loop={false} />
         <View style={styles.header}>
           <PressableScale testID="back-button" onPress={() => router.replace('/(tabs)')} scaleTo={0.88} style={styles.back}>
             <Feather name="arrow-left" size={20} color={colors.foreground} />
