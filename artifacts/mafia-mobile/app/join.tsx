@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { useJoinRoom } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
-import { GlassPanel, PressableScale } from '@/components/cinematic';
+import { GlassPanel, PressableScale, VideoBackground } from '@/components/cinematic';
+import { PrimaryButton } from '@/components/cinematic/PrimaryButton';
 
 const PROFILE_KEY = '@mafia/profile';
 type Profile = { nickname: string; playerId: string };
@@ -19,7 +20,13 @@ export default function JoinRoom() {
   const [code, setCode] = useState('');
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState('');
-  useEffect(() => { AsyncStorage.getItem(PROFILE_KEY).then((value) => { if (value) setProfile(JSON.parse(value) as Profile); }); }, []);
+  const appear = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    AsyncStorage.getItem(PROFILE_KEY).then((value) => { if (value) setProfile(JSON.parse(value) as Profile); });
+    Animated.timing(appear, { toValue: 1, duration: 620, useNativeDriver: true }).start();
+  }, []);
+
   const submit = () => {
     const clean = code.replace(/\D/g, '');
     if (clean.length !== 10) {
@@ -41,8 +48,15 @@ export default function JoinRoom() {
       onError: () => { setError('That code did not open a room. Check the digits and try again.'); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); },
     });
   };
+
+  const appearStyle = {
+    opacity: appear,
+    transform: [{ translateY: appear.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }],
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <VideoBackground source={require('@/assets/videos/bg-wolf.mp4')} scrimOpacity={0.42} loop={false} />
       <View style={styles.header}>
         <PressableScale testID="back-button" onPress={() => router.back()} scaleTo={0.88} style={styles.back}>
           <Feather name="arrow-left" size={20} color={colors.foreground} />
@@ -50,10 +64,27 @@ export default function JoinRoom() {
         <Text style={[styles.headerTitle, { color: colors.foreground }]}>Join room</Text>
         <View style={{ width: 40 }} />
       </View>
-      <View style={styles.content}>
+      <Animated.View style={[styles.content, appearStyle]}>
         <Text style={[styles.eyebrow, { color: colors.accent }]}>A SECRET IS WAITING</Text>
-        <Text style={[styles.title, { color: colors.foreground }]}>Enter the{'\n'}room code.</Text>
-        <Text style={[styles.body, { color: colors.mutedForeground }]}>Ask your host for the ten digits. They are the only way in.</Text>
+        <Text style={[styles.title, { color: colors.foreground }]}>
+          Enter the{'\n'}
+          <Text
+            style={{
+              color: colors.accent,
+              textShadowColor: colors.accent,
+              textShadowOffset: { width: 0, height: 0 },
+              textShadowRadius: 22,
+            }}
+          >
+            room code.
+          </Text>
+        </Text>
+        <Animated.View
+          style={[
+            styles.titleUnderline,
+            { backgroundColor: colors.accent, width: appear.interpolate({ inputRange: [0, 1], outputRange: [0, 46] }) },
+          ]}
+        />
 
         <GlassPanel radius={18} style={styles.inputPanel} borderColor={error ? 'rgba(178,58,58,0.55)' : undefined} noSheen>
           <TextInput
@@ -73,22 +104,13 @@ export default function JoinRoom() {
         </View>
 
         <View style={styles.bottom}>
-          <PressableScale testID="join-submit" disabled={joinRoom.isPending} onPress={submit} style={[styles.button, { backgroundColor: colors.primary }]}>
-            {joinRoom.isPending ? (
-              <ActivityIndicator color={colors.primaryForeground} />
-            ) : (
-              <>
-                <Text style={[styles.buttonText, { color: colors.primaryForeground }]}>Unlock room</Text>
-                <Feather name="lock" size={17} color={colors.primaryForeground} />
-              </>
-            )}
-          </PressableScale>
+          <PrimaryButton testID="join-submit" label="Unlock room" icon="lock" onPress={submit} loading={joinRoom.isPending} />
           <View style={styles.hint}>
             <Feather name="shield" size={14} color={colors.accent} />
             <Text style={[styles.hintText, { color: colors.mutedForeground }]}>Codes are private to your group.</Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -101,15 +123,13 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: 24, paddingTop: 64, paddingBottom: 20 },
   eyebrow: { fontFamily: 'Inter_600SemiBold', fontSize: 10, letterSpacing: 2, marginBottom: 15 },
   title: { fontFamily: 'Inter_700Bold', fontSize: 43, letterSpacing: -2.3, lineHeight: 46 },
-  body: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 22, maxWidth: 310, marginTop: 18 },
+  titleUnderline: { height: 3, borderRadius: 3, marginTop: 18 },
   inputPanel: { marginTop: 42, height: 70, justifyContent: 'center', paddingHorizontal: 17 },
   input: { fontFamily: 'Inter_600SemiBold', fontSize: 25, letterSpacing: 5, padding: 0 },
   codeMeta: { minHeight: 29, flexDirection: 'row', justifyContent: 'space-between', paddingTop: 7 },
   error: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17 },
   count: { fontFamily: 'Inter_400Regular', fontSize: 11 },
   bottom: { marginTop: 'auto' },
-  button: { height: 58, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
-  buttonText: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
   hint: { justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 8, marginTop: 17 },
   hintText: { fontFamily: 'Inter_400Regular', fontSize: 11 },
 });

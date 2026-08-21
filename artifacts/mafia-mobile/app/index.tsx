@@ -57,7 +57,7 @@ export default function IntroVideo() {
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
         <LinearGradient pointerEvents="none" colors={['transparent', 'rgba(10,10,10,0.55)']} style={styles.bottomScrim} />
-        {!soundOn ? (
+        {Platform.OS === 'web' && !soundOn ? (
           <Animated.View style={[styles.soundButtonWrap, soundButtonStyle]}>
             <PressableScale onPress={enableSound} style={styles.soundButtonPressable}>
               <GlassPanel radius={22} style={styles.soundButton} noSheen>
@@ -73,7 +73,7 @@ export default function IntroVideo() {
 
   const player = useVideoPlayer(require('@/assets/videos/intro.mp4'), (instance) => {
     instance.loop = false;
-    instance.muted = true;
+    instance.muted = false; // natif = pas de restriction autoplay contrairement au web
     instance.play();
   });
 
@@ -86,7 +86,7 @@ export default function IntroVideo() {
     <View style={styles.screen}>
       <VideoView player={player} style={styles.video} contentFit="cover" nativeControls={false} />
       <LinearGradient pointerEvents="none" colors={['transparent', 'rgba(10,10,10,0.55)']} style={styles.bottomScrim} />
-      {!soundOn ? (
+      {Platform.OS === 'web' && !soundOn ? (
         <Animated.View style={[styles.soundButtonWrap, soundButtonStyle]}>
           <PressableScale onPress={enableSound} style={styles.soundButtonPressable}>
             <GlassPanel radius={22} style={styles.soundButton} noSheen>

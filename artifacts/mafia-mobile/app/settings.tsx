@@ -21,7 +21,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <VideoBackground source={require('@/assets/videos/bg-wolf.mp4')} scrimOpacity={0.42} />
+      <VideoBackground source={require('@/assets/videos/bg-wolf.mp4')} scrimOpacity={0.42} loop={false} />
       <View style={styles.header}>
         <PressableScale testID="back-button" onPress={() => router.back()} scaleTo={0.88} style={styles.back}>
           <Feather name="arrow-left" size={20} color={colors.foreground} />
