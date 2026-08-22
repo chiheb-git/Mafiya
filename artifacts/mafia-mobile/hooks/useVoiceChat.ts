@@ -36,7 +36,11 @@ export function useVoiceChat(code: string, playerId: string, nickname: string, b
         setVoiceConnected(true);
         setVoiceError(null);
       } catch (err: any) {
-        if (!cancelled) setVoiceError(err?.message ?? 'Erreur de connexion vocale');
+        if (!cancelled) {
+          const detail = err?.message || err?.toString?.() || JSON.stringify(err);
+          const cause = err?.cause ? ` | cause: ${err.cause?.message || err.cause}` : '';
+          setVoiceError(`${detail}${cause}`);
+        }
       }
     }
 
