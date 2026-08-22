@@ -19,6 +19,7 @@ import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from '@/hooks/useColors';
 import { useLobbySocket } from '@/hooks/useLobbySocket';
+import { useVoiceChat } from '@/hooks/useVoiceChat';
 import { useAudioRecorderState, useAudioRecorder, RecordingPresets, requestRecordingPermissionsAsync, getRecordingPermissionsAsync, useAudioPlayer } from 'expo-audio';
 import { GlassPanel, GlowOrb, PressableScale, VideoBackground } from '@/components/cinematic';
 
@@ -51,6 +52,7 @@ export default function RoomCode() {
     passSpeaking,
   } = useLobbySocket(code);
 
+  const { voiceError, setMicrophoneEnabled } = useVoiceChat(code, profile?.playerId ?? '', profile?.nickname ?? '', process.env.EXPO_PUBLIC_DOMAIN || null);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [micPermissionDenied, setMicPermissionDenied] = useState(false);
   const ambiencePlayer = useAudioPlayer(require('@/assets/audio/lobby-ambience.mp3'));
@@ -370,6 +372,12 @@ export default function RoomCode() {
                 </GlassPanel>
               ) : null}
 
+              {voiceError ? (
+                <GlassPanel radius={18} tint="rgba(90,20,20,0.45)" borderColor="rgba(178,58,58,0.6)" style={styles.errorBanner} noSheen>
+                  <Text style={[styles.errorText, { color: colors.foreground }]}>Voix: {voiceError}</Text>
+                </GlassPanel>
+              ) : null}
+
               <View style={styles.sectionHeader}>
                 <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{lobbyState.status === 'STARTED' ? 'Le cercle' : 'Players'}</Text>
                 <View style={styles.connectedPill}>
@@ -421,6 +429,7 @@ export default function RoomCode() {
                           }
                         }
                         setMic(!me.microphoneOn);
+                        setMicrophoneEnabled(!me.microphoneOn);
                       }}
                       scaleTo={0.9}
                       style={[styles.micButton, { backgroundColor: me.microphoneOn ? colors.primary : colors.secondary }]}

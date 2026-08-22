@@ -15,12 +15,14 @@ import {
 import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setBaseUrl } from '@workspace/api-client-react';
+import { registerGlobals } from '@livekit/react-native';
 import { useAudioPlayer } from 'expo-audio';
 import { FilmVignette } from '@/components/cinematic';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 setBaseUrl(process.env.EXPO_PUBLIC_DOMAIN || null);
+registerGlobals();
 
 const queryClient = new QueryClient();
 

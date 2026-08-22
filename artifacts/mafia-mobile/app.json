@@ -47,7 +47,9 @@
           "microphonePermission": "MAFIA a besoin du micro pour la communication vocale pendant les parties."
         }
       ],
-      "expo-video"
+      "expo-video",
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc"
     ],
     "experiments": {
       "typedRoutes": true,
