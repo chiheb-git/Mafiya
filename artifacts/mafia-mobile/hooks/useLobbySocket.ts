@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -142,8 +142,12 @@ export function useLobbySocket(code: string) {
 
     const url = baseUrl || 'http://localhost:3000';
     const socketClient = io(url, {
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       autoConnect: false,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 20000,
     });
 
     socketClient.on('connect', () => {
