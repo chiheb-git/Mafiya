@@ -121,7 +121,7 @@ export function useLobbySocket(code: string) {
   const [connected, setConnected] = useState(false);
 
   const baseUrl = useMemo(() => {
-    if (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_DOMAIN) {
+    if (typeof process !== 'undefined' && process.env.EXPO_PUBLIC_DOMAIN) {
       return process.env.EXPO_PUBLIC_DOMAIN;
     }
     return null;
