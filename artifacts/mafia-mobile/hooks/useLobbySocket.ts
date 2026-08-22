@@ -168,6 +168,11 @@ export function useLobbySocket(code: string) {
       setConnected(false);
     });
 
+    socketClient.on('connect_error', (err: any) => {
+      setConnected(false);
+      setError('Connexion echouee: ' + (err?.message || 'erreur inconnue') + ' (url: ' + url + ')');
+    });
+
     socketClient.on('lobby:state', (payload: LobbyState) => {
       setLobbyState(payload);
       if (payload.status === 'STARTED' && !gamePublicState) {

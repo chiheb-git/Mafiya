@@ -233,6 +233,9 @@ export default function RoomCode() {
       <View style={[styles.center, { backgroundColor: colors.background }]}>
         <ActivityIndicator color={colors.accent} />
         <Text style={[styles.statusText, { color: colors.mutedForeground, marginTop: 16 }]}>Connecting to lobby…</Text>
+        {error ? (
+          <Text style={[styles.statusText, { color: colors.destructive, marginTop: 12, paddingHorizontal: 24, textAlign: 'center' }]}>{error}</Text>
+        ) : null}
       </View>
     );
   }
