@@ -20,6 +20,24 @@ import { useAudioPlayer } from 'expo-audio';
 import { FilmVignette } from '@/components/cinematic';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
+// Polyfill AbortSignal.any() - missing in React Native Hermes engine, required by livekit-client
+if (typeof (AbortSignal as any).any === "undefined") {
+  (AbortSignal as any).any = function (signals: AbortSignal[]): AbortSignal {
+    const controller = new AbortController();
+    for (const signal of signals) {
+      if (signal.aborted) {
+        controller.abort();
+        return controller.signal;
+      }
+    }
+    const abortHandler = () => controller.abort();
+    for (const signal of signals) {
+      signal.addEventListener("abort", abortHandler);
+    }
+    return controller.signal;
+  };
+}
+
 SplashScreen.preventAutoHideAsync();
 setBaseUrl(process.env.EXPO_PUBLIC_DOMAIN || null);
 registerGlobals();
